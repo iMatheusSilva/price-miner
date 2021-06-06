@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[171]:
+# In[4]:
 
 
 from selenium.webdriver.common.keys import Keys
@@ -13,7 +13,7 @@ import pandas as pd
 import numpy as np
 
 
-# In[172]:
+# In[5]:
 
 
 class PriceMiner:
@@ -21,9 +21,9 @@ class PriceMiner:
     def __init__(self, item='', max_items='', headless=True):
         self.item = item
         self.max_items = max_items 
-        self.browser_init(headless)
+        self.__browser_init(headless)
         
-    def var_reset(self):
+    def __var_reset(self):
         """
         Create or reset global variables used in scraping methods
         Parameters:
@@ -41,7 +41,7 @@ class PriceMiner:
         self.price_values = []
         self.link_values = []
         
-    def browser_init(self, headless):
+    def __browser_init(self, headless):
         """
         This method is delegated to configure and start the browser that will serve to
         all the other intern methods.
@@ -61,7 +61,7 @@ class PriceMiner:
             options.add_argument("--headless")
         self.browser = webdriver.Chrome(options=options)
     
-    def do_search(self, url, input_element):
+    def __do_search(self, url, input_element):
         """ 
         This method is destinated to make a simple search, given the url and the input field
         from any website.
@@ -90,25 +90,31 @@ class PriceMiner:
         
         Parameters:
         - df(dataframe):
-        - precision(float):
+        - precision(float): 0..1 values, lower values means stronger filtering. 
         
         Return:
-        - 
+        - Filtered dataframe
         """
         return df[(np.abs(stats.zscore(df['Preço R$'])) < precision)]  
         
         
     def amazon(self):
-        """
+         """
+         This method performs a web-scrap search on the Amazon website
         
+        -Parameters:
+         No external parameters needed.
+        
+        -Return:
+         Dataframe
         
         """
-        self.var_reset()
+        self.__var_reset()
         url = 'http://amazon.com.br'
         place = "Amazon"
         input_element = '//*[@id="twotabsearchtextbox"]'
         b = self.browser
-        if self.do_search(url, input_element):
+        if self.__do_search(url, input_element):
             self.__name_elements  = b.find_elements_by_class_name('a-size-base-plus')
             self.__price_elements = b.find_elements_by_class_name('a-price-whole')
             self.__cents_elements = b.find_elements_by_class_name('a-price-fraction')
@@ -120,19 +126,26 @@ class PriceMiner:
                                          + self.__cents_elements[i])
                 self.link_values.append(self.__link_elements[i].get_attribute('href'))
             data = {'Item':self.name_values, 'Preço R$': self.price_values, "Local": place, 'Link': self.link_values}
-        return pd.DataFrame(data, index=list(range(max_items)))
+        return pd.DataFrame(data)
     
     def mercadolivre(self):
         """
+         This method performs a web-scrap search on the Mercado Livre website
+        
+        -Parameters:
+         No external parameters needed.
+        
+        -Return:
+         Dataframe
         
         """
-        self.var_reset()
+        self.__var_reset()
         url = 'http://mercadolivre.com.br'
         place = "Mercado Livre"
         input_element = '/html/body/header/div/form/input'
         b = self.browser
 
-        if self.do_search(url, input_element):  
+        if self.__do_search(url, input_element):  
             ml_items = b.find_elements_by_class_name('ui-search-layout__item') 
             self.__name_elements  = b.find_elements_by_class_name('ui-search-item__title')
             self.__price_elements = b.find_elements_by_class_name('price-tag-fraction')
@@ -144,21 +157,28 @@ class PriceMiner:
                 self.link_values.append(self.__link_elements[i].get_attribute('href'))
                 self.price_values.append(float(self.__price_elements[i].text.replace('.','')))
             data = {'Item':self.name_values, 'Preço R$': self.price_values, "Local": place, "Link": self.link_values}        
-            return pd.DataFrame(data, index=list(range(max_items, max_items*2)))
+            return pd.DataFrame(data)
         else:
             return False
     
     def magalu(self):
         """
+         This method performs a web-scrap search on the Magazine Luiza website
+        
+        -Parameters:
+         No external parameters needed.
+        
+        -Return:
+         Dataframe
         
         """
-        self.var_reset()
+        self.__var_reset()
         url   = 'https://www.magazineluiza.com.br'
         place = 'Magazine Luiza'
         input_element = '//*[@id="inpHeaderSearch"]'
         b = self.browser
         
-        if self.do_search(url, input_element):
+        if self.__do_search(url, input_element):
             self.__name_elements  = b.find_elements_by_class_name('productTitle')
             self.__price_elements = b.find_elements_by_class_name('price')
             self.__link_elements  = b.find_elements_by_class_name('product-li')
@@ -171,28 +191,50 @@ class PriceMiner:
                 self.price_values.append(float(aux_price))
                 self.link_values.append(self.__link_elements[i].get_attribute('href'))
             data = {'Item':self.name_values, 'Preço R$': self.price_values, "Local": place, 'Link': self.link_values}
-        return pd.DataFrame(data, index=list(range(max_items*2, max_items*3)))
+        return pd.DataFrame(data)
+    
+    def search_all(self, sort=True):
+        """
+         This method performs a web-scrap search on the all avaliable websites .
+        
+        -Parameters:
+         sort: boolean.
+        
+        -Return:
+         Dataframe
+        
+        """
+        df1 = self.magalu()
+        df2 = self.mercadolivre()
+        df3 = self.amazon()
+        dataframes = [df1, df2, df3]
+        final_dataframe = pd.concat(dataframes, ignore_index=True)
+        if sort:
+            return final_dataframe.sort_values(by=['Preço R$'])
+        else:
+            return final_dataframe
+        
 
 
-# In[ ]:
-
-
-
-
-
-# In[173]:
+# In[6]:
 
 
 if __name__ == '__main__':
-    item = 'Memória Ram DDR4'
+    item = 'Microfone Gamer'
     max_items = 10        
     x = PriceMiner(item, max_items, headless=False)
-    magalu = x.magalu()
-    display(magalu)
-    x.browser.close()
+    #magalu = x.magalu()
+    #display(magalu)
     #amazon = x.amazon()
-    #mercadolivre = x.mercadolivre()
     #display(amazon)
+    
+    display(x.show_relevants(x.search_all(False), 0.6))
+    x.browser.close()
+    
+    #frames = [amazon,magalu]
+    #final_table = pd.concat(frames)
+    #display(final_table)
+    #mercadolivre = x.mercadolivre()
     #display(mercadolivre)
     #display(x.show_relevants(amazon, 1))
     #display(x.show_relevants(mercadolivre, 1))
