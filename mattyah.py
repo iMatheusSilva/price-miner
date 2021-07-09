@@ -56,7 +56,6 @@ class PriceMiner:
         - browser(object)
         """
         options = webdriver.ChromeOptions()
-        options.add_argument("--start-maximized")
         if headless:
             options.add_argument("--headless")
         self.browser = webdriver.Chrome(options=options)
@@ -247,60 +246,17 @@ class PriceMiner:
                     "Local": place, 'Link': self.__link_values}
             return pd.DataFrame(data)
                                             
-            """
-            names
-            /html/body/div[1]/div/div[3]/div/div[2]/div/div[2]/div[1]/a/div/div/div[2]/div[1]/div[1]/div
-            /html/body/div[1]/div/div[3]/div/div[2]/div/div[2]/div[6]/a/div/div/div[2]/div[1]/div[1]/div
-            /html/body/div[1]/div/div[3]/div/div[2]/div/div[2]/div[7]/a/div/div/div[2]/div[1]/div[1]/div
-            /html/body/div[1]/div/div[3]/div/div[2]/div/div[2]/div[6]/a/div/div/div[2]/div[1]/div[1]/div
-            /html/body/div[1]/div/div[3]/div/div[2]/div/div[2]/div[16]/a/div/div/div[2]/div[1]/div[1]/div
-            """
-                
-            """
-            prices
-            /html/body/div[1]/div/div[3]/div/div[2]/div/div[2]/div[6]/a/div/div/div[2]/div[2]/div/span[2]
-            /html/body/div[1]/div/div[3]/div/div[2]/div/div[2]/div[6]/a/div/div/div[2]/div[2]/div/span[4]
-            /html/body/div[1]/div/div[3]/div/div[2]/div/div[2]/div[7]/a/div/div/div[2]/div[2]/div/span[2]
-            /html/body/div[1]/div/div[3]/div/div[2]/div/div[2]/div[8]/a/div/div/div[2]/div[2]/div/span[2]
-            /html/body/div[1]/div/div[3]/div/div[2]/div/div[2]/div[9]/a/div/div/div[2]/div[2]/div/span[2]
-            /html/body/div[1]/div/div[3]/div/div[2]/div/div[2]/div[10]/a/div/div/div[2]/div[2]/div/span[2]
-            /html/body/div[1]/div/div[3]/div/div[2]/div/div[2]/div[26]/a/div/div/div[2]/div[2]/div/span[2]
-            """
-                                         
-            """
-            links
-            /html/body/div[1]/div/div[3]/div/div[2]/div/div[2]/div[11]/a
-            /html/body/div[1]/div/div[3]/div/div[2]/div/div[2]/div[26]/a
-            /html/body/div[1]/div/div[3]/div/div[2]/div/div[2]/div[27]/a
-            """
         
-                
+        
                 
 if __name__ == '__main__':
            
-    item = "Kit de Cuecas"  # items[random.randint(0, len(items))]
+    item = "SSD M.2 240gb"  
     max_items = 10
-    pesquisa_preco = PriceMiner(item, max_items, headless=False)
-   
-    #display(pesquisa_preco.shopee())
-    
+    pesquisa_preco = PriceMiner(item, max_items)
     produtos = pesquisa_preco.show_relevants(pesquisa_preco.search_all(), 1)
-    produtos.to_html("tabela_produtos.html")
+    produtos.to_html(f"{item}.html")
     pesquisa_preco.browser.close()
-    
-    
-    
-
-
-# In[ ]:
-
-
-
-
-
-# In[3]:
-
-
 
 try:
     email_from = "kronenautobots@gmail.com"
