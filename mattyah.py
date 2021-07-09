@@ -246,8 +246,6 @@ class PriceMiner:
                     "Local": place, 'Link': self.__link_values}
             return pd.DataFrame(data)
                                             
-        
-        
                 
 if __name__ == '__main__':
            
@@ -256,7 +254,7 @@ if __name__ == '__main__':
     pesquisa_preco = PriceMiner(item, max_items)
     produtos = pesquisa_preco.show_relevants(pesquisa_preco.search_all(), 1)
     produtos.to_html("resultado.html")
-    pesquisa_preco.browser.close()
+    pesquisa_preco.browser.quit()
 
 try:
     email_from = "kronenautobots@gmail.com"
