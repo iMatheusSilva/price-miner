@@ -55,7 +55,6 @@ class PriceMiner:
         - browser(object)
         """
         options = webdriver.ChromeOptions()
-        options.add_argument("--start-maximized")
         if headless:
             options.add_argument("--headless")
         self.browser = webdriver.Chrome(options=options)
@@ -271,7 +270,7 @@ if __name__ == '__main__':
              'Monitor Gamer', 'Kit de Meias', 'Kit de Cuecas']
     item = "Xiaomi Redmi 9"  # items[random.randint(0, len(items))]
     max_items = 5
-    pesquisa_preco = PriceMiner(item, max_items, headless=False)
+    pesquisa_preco = PriceMiner(item, max_items)
     # display(pesquisa_preco.shopee())
 
     produtos = pesquisa_preco.show_relevants(pesquisa_preco.search_all(), 1)
