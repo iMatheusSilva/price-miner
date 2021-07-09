@@ -255,14 +255,14 @@ if __name__ == '__main__':
     max_items = 10
     pesquisa_preco = PriceMiner(item, max_items)
     produtos = pesquisa_preco.show_relevants(pesquisa_preco.search_all(), 1)
-    produtos.to_html(f"{item}.html")
+    produtos.to_html("resultado.html")
     pesquisa_preco.browser.close()
 
 try:
     email_from = "kronenautobots@gmail.com"
     email_to = "mtsilva2303@gmail.com"
     smtp = "smtp.gmail.com"
-    excel_file = f"{item}.html"
+    excel_file = "resultado.html"
     msg = EmailMessage()
     msg['Subject'] = f"Resultado de Pesquisa por: {item}"
     msg['From'] = email_from
