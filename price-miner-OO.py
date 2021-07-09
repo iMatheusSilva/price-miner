@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[4]:
+# In[1]:
 
 
 from selenium.webdriver.common.keys import Keys
@@ -13,7 +13,7 @@ import pandas as pd
 import numpy as np
 
 
-# In[5]:
+# In[2]:
 
 
 class PriceMiner:
@@ -22,16 +22,15 @@ class PriceMiner:
         self.item = item
         self.max_items = max_items 
         self.__browser_init(headless)
-        
+
     def __var_reset(self):
         """
         Create or reset global variables used in scraping methods
         Parameters:
         - No parameters
-        
+
         Return:
         - No return
-        
         """
         self.__name_elements  = []
         self.__price_elements = []
@@ -40,38 +39,37 @@ class PriceMiner:
         self.name_values  = []
         self.price_values = []
         self.link_values = []
-        
+
     def __browser_init(self, headless):
         """
         This method is delegated to configure and start the browser that will serve to
         all the other intern methods.
-        
+
         Parameters:
         - headless(boolean): Defines the browser visibility. The standard value is True, 
-          it means that browser will work in background. If you want to see the browser working, 
-          you have to set headless=False 
-        
+        it means that browser will work in background. If you want to see the browser working, 
+        you have to set headless=False 
+
         Return:
         - browser(object)
-        
         """
         options = webdriver.ChromeOptions()
         options.add_argument("--start-maximized")
         if headless:
             options.add_argument("--headless")
         self.browser = webdriver.Chrome(options=options)
-    
+
     def __do_search(self, url, input_element):
         """ 
         This method is destinated to make a simple search, given the url and the input field
         from any website.
-        
+
         Paramaters:
         - url(string): Url link from the website 
         - input_element(string): XPATH value from the main search input field.
-        
+
         Return:
-         -boolean
+        -boolean
         """
         try:
             self.browser.get(url)
@@ -82,32 +80,31 @@ class PriceMiner:
             return True
         except:
             return False
-        
-        
+
+
     def show_relevants(self, df, precision):
         """
         Remove the dataframe outliers.  
-        
+
         Parameters:
         - df(dataframe):
         - precision(float): 0..1 values, lower values means stronger filtering. 
-        
+
         Return:
         - Filtered dataframe
         """
         return df[(np.abs(stats.zscore(df['Preço R$'])) < precision)]  
-        
-        
+
+
     def amazon(self):
-         """
-         This method performs a web-scrap search on the Amazon website
-        
+        """
+        This method performs a web-scrap search on the Amazon website
+
         -Parameters:
-         No external parameters needed.
-        
+        No external parameters needed.
+
         -Return:
-         Dataframe
-        
+        Dataframe
         """
         self.__var_reset()
         url = 'http://amazon.com.br'
@@ -122,22 +119,21 @@ class PriceMiner:
             for i in range(0, max_items):
                 self.name_values.append(self.__name_elements[i].text)
                 self.__cents_elements[i] = int(self.__cents_elements[i].text)/100
-                self.price_values.append(float(self.__price_elements[i].text.replace('.',''))
-                                         + self.__cents_elements[i])
+                self.price_values.append(float(self.__price_elements[i].text.replace('.','')) 
+                                                                  + self.__cents_elements[i])
                 self.link_values.append(self.__link_elements[i].get_attribute('href'))
-            data = {'Item':self.name_values, 'Preço R$': self.price_values, "Local": place, 'Link': self.link_values}
+        data = {'Item':self.name_values, 'Preço R$': self.price_values, "Local": place, 'Link': self.link_values}
         return pd.DataFrame(data)
-    
+
     def mercadolivre(self):
         """
-         This method performs a web-scrap search on the Mercado Livre website
-        
+        This method performs a web-scrap search on the Mercado Livre website
+
         -Parameters:
-         No external parameters needed.
-        
+        No external parameters needed.
+
         -Return:
-         Dataframe
-        
+        Dataframe
         """
         self.__var_reset()
         url = 'http://mercadolivre.com.br'
@@ -160,24 +156,23 @@ class PriceMiner:
             return pd.DataFrame(data)
         else:
             return False
-    
+
     def magalu(self):
         """
-         This method performs a web-scrap search on the Magazine Luiza website
-        
+        This method performs a web-scrap search on the Magazine Luiza website
+
         -Parameters:
-         No external parameters needed.
-        
+        No external parameters needed.
+
         -Return:
-         Dataframe
-        
+        Dataframe
         """
         self.__var_reset()
         url   = 'https://www.magazineluiza.com.br'
         place = 'Magazine Luiza'
         input_element = '//*[@id="inpHeaderSearch"]'
         b = self.browser
-        
+
         if self.__do_search(url, input_element):
             self.__name_elements  = b.find_elements_by_class_name('productTitle')
             self.__price_elements = b.find_elements_by_class_name('price')
@@ -191,18 +186,17 @@ class PriceMiner:
                 self.price_values.append(float(aux_price))
                 self.link_values.append(self.__link_elements[i].get_attribute('href'))
             data = {'Item':self.name_values, 'Preço R$': self.price_values, "Local": place, 'Link': self.link_values}
-        return pd.DataFrame(data)
-    
+            return pd.DataFrame(data)
+
     def search_all(self, sort=True):
         """
-         This method performs a web-scrap search on the all avaliable websites .
-        
+        This method performs a web-scrap search on the all avaliable websites .
+
         -Parameters:
-         sort: boolean.
-        
+        sort: boolean.
+
         -Return:
-         Dataframe
-        
+        Dataframe
         """
         df1 = self.magalu()
         df2 = self.mercadolivre()
@@ -216,21 +210,22 @@ class PriceMiner:
         
 
 
-# In[6]:
+# In[3]:
 
 
 if __name__ == '__main__':
     item = 'Microfone Gamer'
     max_items = 10        
-    x = PriceMiner(item, max_items, headless=False)
+    pesquisa_preco = PriceMiner(item, max_items, headless=False)
+  
+    
+    display(pesquisa_preco.search_all())
+    pesquisa_preco.browser.close()
+    
     #magalu = x.magalu()
     #display(magalu)
     #amazon = x.amazon()
     #display(amazon)
-    
-    display(x.show_relevants(x.search_all(False), 0.6))
-    x.browser.close()
-    
     #frames = [amazon,magalu]
     #final_table = pd.concat(frames)
     #display(final_table)
