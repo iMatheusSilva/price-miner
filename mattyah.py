@@ -262,7 +262,7 @@ try:
     email_from = "kronenautobots@gmail.com"
     email_to = "mtsilva2303@gmail.com"
     smtp = "smtp.gmail.com"
-    excel_file = "tabela_produtos.html"
+    excel_file = f"{item}.html"
     msg = EmailMessage()
     msg['Subject'] = f"Resultado de Pesquisa por: {item}"
     msg['From'] = email_from
