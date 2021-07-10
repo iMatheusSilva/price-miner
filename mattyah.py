@@ -12,6 +12,7 @@ from time import sleep
 import pandas as pd  
 import numpy as np
 import smtplib
+import sys
 from email.message import EmailMessage
 
 
@@ -249,7 +250,7 @@ class PriceMiner:
                 
 if __name__ == '__main__':
            
-    item = "SSD M.2 240gb"  
+    item = sys.argv[1]
     max_items = 10
     pesquisa_preco = PriceMiner(item, max_items)
     produtos = pesquisa_preco.show_relevants(pesquisa_preco.search_all(), 1)
