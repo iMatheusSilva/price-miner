@@ -30,7 +30,7 @@
     $('login100-form-btn').click(function () {
         $.ajax({
             type: "POST",
-            url: "~/pythoncode.py",
+            url: "/var/www/html/mattyah.py",
             data: { param: text }
         }).done(function (o) {
             // do something

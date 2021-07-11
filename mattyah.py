@@ -271,7 +271,8 @@ class PriceMiner:
 
 if __name__ == '__main__':
 
-    item = sys.argv[1]
+    #item = sys.argv[1]
+    item = "remdi 9a"
     max_items = 10
     pesquisa_preco = PriceMiner(item, max_items)
     produtos = pesquisa_preco.show_relevants(pesquisa_preco.search_all(), 1)
