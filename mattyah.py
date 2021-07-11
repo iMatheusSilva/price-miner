@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from selenium import webdriver
 from scipy import stats
 from time import sleep
-import pandas as pd  
+import pandas as pd
 import numpy as np
 import smtplib
 import random
@@ -14,11 +14,12 @@ import sys
 import pyshorteners
 from email.message import EmailMessage
 
+
 class PriceMiner:
-    
+
     def __init__(self, item='', max_items='', headless=True):
         self.item = item
-        self.max_items = max_items 
+        self.max_items = max_items
         self.__browser_init(headless)
 
     def __setup(self):
@@ -30,11 +31,11 @@ class PriceMiner:
         Return:
         - No return
         """
-        self.__name_elements  = []
+        self.__name_elements = []
         self.__price_elements = []
         self.__cents_elements = []
         self.__link_elements = []
-        self.__name_values  = []
+        self.__name_values = []
         self.__price_values = []
         self.__link_values = []
 
@@ -78,7 +79,6 @@ class PriceMiner:
         except:
             return False
 
-
     def show_relevants(self, df, precision):
         """
         Remove the dataframe outliers.  
@@ -90,8 +90,8 @@ class PriceMiner:
         Return:
         - Filtered dataframe
         """
-        return df[(np.abs(stats.zscore(df['Preço R$'])) < precision)]  
-    
+        return df[(np.abs(stats.zscore(df['Preço R$'])) < precision)]
+
     def search_all(self, sort=True, shortener=True):
         """
         This method performs a web-scrap search on the all avaliable websites .
@@ -112,13 +112,13 @@ class PriceMiner:
             s = pyshorteners.Shortener()
             for i in range(len(final_dataframe)):
                 shortener_api = [s.tinyurl.short(final_dataframe['Link'].values[i]),
-                s.isgd.short(final_dataframe['Link'].values[i]), s.qpsru.short(final_dataframe['Link'].values[i])]
-                final_dataframe['Link'].values[i] = shortener_api[random.randint(0,2)]
+                                 s.isgd.short(final_dataframe['Link'].values[i]), s.qpsru.short(final_dataframe['Link'].values[i])]
+                final_dataframe['Link'].values[i] = shortener_api[random.randint(
+                    0, 2)]
         if sort:
             return final_dataframe.sort_values(by=['Preço R$'])
         else:
             return final_dataframe
-
 
     def amazon(self):
         """
@@ -136,17 +136,23 @@ class PriceMiner:
         input_element = '//*[@id="twotabsearchtextbox"]'
         b = self.browser
         if self.__do_search(url, input_element):
-            self.__name_elements  = b.find_elements_by_class_name('a-size-base-plus')
-            self.__price_elements = b.find_elements_by_class_name('a-price-whole')
-            self.__cents_elements = b.find_elements_by_class_name('a-price-fraction')
-            self.__link_elements  = b.find_elements_by_class_name('s-no-outline')
+            self.__name_elements = b.find_elements_by_class_name(
+                'a-size-base-plus')
+            self.__price_elements = b.find_elements_by_class_name(
+                'a-price-whole')
+            self.__cents_elements = b.find_elements_by_class_name(
+                'a-price-fraction')
+            self.__link_elements = b.find_elements_by_class_name(
+                's-no-outline')
             for i in range(0, max_items):
                 self.__name_values.append(self.__name_elements[i].text)
-                self.__cents_elements[i] = int(self.__cents_elements[i].text)/100
-                self.__price_values.append(float(self.__price_elements[i].text.replace('.','')) 
-                                                                  + self.__cents_elements[i])
-                self.__link_values.append(self.__link_elements[i].get_attribute('href'))
-        data = {'Item':self.__name_values, 'Preço R$': self.__price_values, 
+                self.__cents_elements[i] = int(
+                    self.__cents_elements[i].text)/100
+                self.__price_values.append(float(self.__price_elements[i].text.replace('.', ''))
+                                           + self.__cents_elements[i])
+                self.__link_values.append(
+                    self.__link_elements[i].get_attribute('href'))
+        data = {'Item': self.__name_values, 'Preço R$': self.__price_values,
                 "Local": place, 'Link': self.__link_values}
         return pd.DataFrame(data)
 
@@ -166,19 +172,24 @@ class PriceMiner:
         input_element = '/html/body/header/div/form/input'
         b = self.browser
 
-        if self.__do_search(url, input_element):  
-            ml_items = b.find_elements_by_class_name('ui-search-layout__item') 
-            self.__name_elements  = b.find_elements_by_class_name('ui-search-item__title')
-            self.__price_elements = b.find_elements_by_class_name('price-tag-fraction')
+        if self.__do_search(url, input_element):
+            ml_items = b.find_elements_by_class_name('ui-search-layout__item')
+            self.__name_elements = b.find_elements_by_class_name(
+                'ui-search-item__title')
+            self.__price_elements = b.find_elements_by_class_name(
+                'price-tag-fraction')
             self.__price_elements = self.__price_elements[::2]
             for i in range(0, len(ml_items)):
-                self.__link_elements.append(ml_items[i].find_element_by_class_name('ui-search-link')) 
+                self.__link_elements.append(
+                    ml_items[i].find_element_by_class_name('ui-search-link'))
             for i in range(0, max_items):
                 self.__name_values.append(self.__name_elements[i].text)
-                self.__link_values.append(self.__link_elements[i].get_attribute('href'))
-                self.__price_values.append(float(self.__price_elements[i].text.replace('.','')))
-            data = {'Item':self.__name_values, 'Preço R$': self.__price_values, 
-                    "Local": place, "Link": self.__link_values}        
+                self.__link_values.append(
+                    self.__link_elements[i].get_attribute('href'))
+                self.__price_values.append(
+                    float(self.__price_elements[i].text.replace('.', '')))
+            data = {'Item': self.__name_values, 'Preço R$': self.__price_values,
+                    "Local": place, "Link": self.__link_values}
             return pd.DataFrame(data)
         else:
             return False
@@ -194,27 +205,31 @@ class PriceMiner:
         Dataframe
         """
         self.__setup()
-        url   = 'https://www.magazineluiza.com.br'
+        url = 'https://www.magazineluiza.com.br'
         place = 'Magazine Luiza'
         input_element = '//*[@id="inpHeaderSearch"]'
         b = self.browser
 
         if self.__do_search(url, input_element):
-            self.__name_elements  = b.find_elements_by_class_name('productTitle')
+            self.__name_elements = b.find_elements_by_class_name(
+                'productTitle')
             self.__price_elements = b.find_elements_by_class_name('price')
-            self.__link_elements  = b.find_elements_by_class_name('product-li')
-            del self.__price_elements[0:4]  
+            self.__link_elements = b.find_elements_by_class_name('product-li')
+            del self.__price_elements[0:4]
             for i in range(0, max_items):
                 self.__name_values.append(self.__name_elements[i].text)
-                aux_price = self.__price_elements[i].text.replace('à vista', '').replace('R$ ', '').replace(',','.')
+                aux_price = self.__price_elements[i].text.replace(
+                    'à vista', '').replace('R$ ', '').replace(',', '.')
                 if aux_price.count('.') > 1:
-                    aux_price = aux_price.replace('.','', aux_price.count('.')-1)
+                    aux_price = aux_price.replace(
+                        '.', '', aux_price.count('.')-1)
                 self.__price_values.append(float(aux_price))
-                self.__link_values.append(self.__link_elements[i].get_attribute('href'))
-            data = {'Item':self.__name_values, 'Preço R$': self.__price_values, 
+                self.__link_values.append(
+                    self.__link_elements[i].get_attribute('href'))
+            data = {'Item': self.__name_values, 'Preço R$': self.__price_values,
                     "Local": place, 'Link': self.__link_values}
             return pd.DataFrame(data)
-    
+
     def shopee(self):
         """
         This method performs a web-scrap search on the Shopee website
@@ -225,7 +240,7 @@ class PriceMiner:
         -Return:
         Dataframe
         """
-        
+
         self.__setup()
         url = 'https://shopee.com.br'
         place = 'Shopee'
@@ -234,23 +249,28 @@ class PriceMiner:
         if self.__do_search(url, input_element):
             sleep(2)
             for i in range(1, self.max_items+1):
-                self.__name_elements.append(b.find_element_by_xpath(f'/html/body/div[1]/div/div[3]/div/div[2]/div/div[2]/div[{i}]/a/div/div/div[2]/div[1]/div[1]/div'))
-                self.__price_elements.append(b.find_element_by_xpath(f'/html/body/div[1]/div/div[3]/div/div[2]/div/div[2]/div[{i}]/a/div/div/div[2]/div[2]/div/span[2]'))
-                self.__link_elements.append(b.find_element_by_xpath(f'/html/body/div[1]/div/div[3]/div/div[2]/div/div[2]/div[{i}]/a'))                             
-            
+                self.__name_elements.append(b.find_element_by_xpath(
+                    f'/html/body/div[1]/div/div[3]/div/div[2]/div/div[2]/div[{i}]/a/div/div/div[2]/div[1]/div[1]/div'))
+                self.__price_elements.append(b.find_element_by_xpath(
+                    f'/html/body/div[1]/div/div[3]/div/div[2]/div/div[2]/div[{i}]/a/div/div/div[2]/div[2]/div/span[2]'))
+                self.__link_elements.append(b.find_element_by_xpath(
+                    f'/html/body/div[1]/div/div[3]/div/div[2]/div/div[2]/div[{i}]/a'))
+
             for i in range(0, max_items):
-                self.__name_values.append(self.__name_elements[i].text)                         
-                aux_price = self.__price_elements[i].text.replace('.','').replace(',','.')
-                self.__price_values.append(float(aux_price))                      
-                self.__link_values.append(self.__link_elements[i].get_attribute('href'))
-                                            
-            data = {'Item':self.__name_values, 'Preço R$': self.__price_values, 
+                self.__name_values.append(self.__name_elements[i].text)
+                aux_price = self.__price_elements[i].text.replace(
+                    '.', '').replace(',', '.')
+                self.__price_values.append(float(aux_price))
+                self.__link_values.append(
+                    self.__link_elements[i].get_attribute('href'))
+
+            data = {'Item': self.__name_values, 'Preço R$': self.__price_values,
                     "Local": place, 'Link': self.__link_values}
             return pd.DataFrame(data)
-                                            
-                
+
+
 if __name__ == '__main__':
-           
+
     item = sys.argv[1]
     max_items = 10
     pesquisa_preco = PriceMiner(item, max_items)
@@ -260,24 +280,23 @@ if __name__ == '__main__':
 
 try:
     email_from = "kronenautobots@gmail.com"
-    email_to = "mtsilva2303@gmail.com"
+    email_to = "matheusts@id.uff.br"
     smtp = "smtp.gmail.com"
     excel_file = f"{item}.html"
     msg = EmailMessage()
     msg['Subject'] = f"Resultado de Pesquisa por: {item}"
     msg['From'] = email_from
     msg['To'] = email_to
-    msg.set_content(f"""
-        Segue em anexo os resultados da pesquisa pelo produto: {item}
-        nos formatos solicitaddos.
-        {produtos.to_string(index_names=False, justify='justify-all')}
-        
-    """)
-    
+    msg.set_content(
+        f"""
+        Segue em anexo os resultados da pesquisa pelo produto: {item} nos formatos solicitados. 
+        """)
+
     with open(excel_file, 'rb') as f:
         file_data = f.read()
-        
-    msg.add_attachment(file_data, maintype="application", subtype="html", filename=excel_file)
+
+    msg.add_attachment(file_data, maintype="application",
+                       subtype="html", filename=excel_file)
     server = smtplib.SMTP(smtp, 587)
     server.starttls()
     server.login(email_from, open('senha.txt').read().strip())
@@ -286,11 +305,3 @@ try:
     print('Email-enviado com sucesso')
 except:
     print('Erro ao enviar e-mail')
-
-
-
-
-
-
-
-

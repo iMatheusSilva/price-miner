@@ -205,7 +205,7 @@ iframe {
 /*------------------------------------------------------------------
 [  ]*/
 .login100-form {
-  width: 290px;
+  width: 360px;
 }
 
 .login100-form-title {
@@ -214,8 +214,6 @@ iframe {
   color: #333333;
   line-height: 1.2;
   text-align: center;
-
-  width: 100%;
   display: block;
   padding-bottom: 54px;
 }
