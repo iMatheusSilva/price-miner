@@ -27,7 +27,7 @@
         });
     });
 
-    $('login100-form-btn').click(function () {
+    $('.login100-form-btn').click(function () {
         $.ajax({
             type: "POST",
             url: "/var/www/html/mattyah.py",
