@@ -26,15 +26,12 @@
             hideValidate(this);
         });
     });
-
-    $('.login100-form-btn').click(function () {
+    $('#python').click(function (input) {
+        console.log('blabla')
         $.ajax({
             type: "POST",
-            url: "/var/www/html/mattyah.py",
-            data: { param: text }
-        }).done(function (o) {
-            // do something
-        });
+            url: "test_server.py",
+        })
     })
 
     function validate(input) {
