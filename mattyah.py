@@ -1,9 +1,6 @@
 #!/usr/bin/python3
 # coding: utf-8
 
-# In[1]:
-
-
 from selenium.webdriver.common.keys import Keys
 import matplotlib.pyplot as plt
 from selenium import webdriver
@@ -12,12 +9,10 @@ from time import sleep
 import pandas as pd  
 import numpy as np
 import smtplib
+import random
 import sys
+import pyshorteners
 from email.message import EmailMessage
-
-
-# In[2]:
-
 
 class PriceMiner:
     
@@ -97,7 +92,7 @@ class PriceMiner:
         """
         return df[(np.abs(stats.zscore(df['Preço R$'])) < precision)]  
     
-    def search_all(self, sort=True):
+    def search_all(self, sort=True, shortener=True):
         """
         This method performs a web-scrap search on the all avaliable websites .
 
@@ -113,6 +108,12 @@ class PriceMiner:
         df4 = self.magalu()
         dataframes = [df1, df2, df3, df4]
         final_dataframe = pd.concat(dataframes, ignore_index=True)
+        if shortener:
+            s = pyshorteners.Shortener()
+            for i in range(len(final_dataframe)):
+                shortener_api = [s.tinyurl.short(final_dataframe['Link'].values[i]),
+                s.isgd.short(final_dataframe['Link'].values[i]), s.qpsru.short(final_dataframe['Link'].values[i])]
+                final_dataframe['Link'].values[i] = shortener_api[random.randint(0,2)]
         if sort:
             return final_dataframe.sort_values(by=['Preço R$'])
         else:
@@ -269,6 +270,7 @@ try:
     msg.set_content(f"""
         Segue em anexo os resultados da pesquisa pelo produto: {item}
         nos formatos solicitaddos.
+        {produtos.to_string(index_names=False, justify='justify-all')}
         
     """)
     
@@ -287,7 +289,7 @@ except:
 
 
 
-# In[ ]:
+
 
 
 
