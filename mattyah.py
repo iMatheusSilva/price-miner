@@ -2,6 +2,7 @@
 # coding: utf-8
 
 from selenium.webdriver.common.keys import Keys
+from http_request_randomizer.requests.proxy.requestProxy import RequestProxy
 import matplotlib.pyplot as plt
 from selenium import webdriver
 from scipy import stats
@@ -53,6 +54,18 @@ class PriceMiner:
         - browser(object)
         """
         options = webdriver.ChromeOptions()
+        options.add_argument('--no-sandbox')
+        options.add_argument('--window-size=1420,1080')
+        options.add_argument('--disable-gpu')
+        PROXY = proxies[0].get_address()
+        webdriver.DesiredCapabilities.CHROME['proxy'] = {
+            "httpProxy": PROXY,
+            "ftpProxy": PROXY,
+            "sslProxy": PROXY,
+
+            "proxyType": "MANUAL",
+
+        }
         if headless:
             options.add_argument("--headless")
         self.browser = webdriver.Chrome(options=options)
@@ -92,7 +105,7 @@ class PriceMiner:
         """
         return df[(np.abs(stats.zscore(df['Preço R$'])) < precision)]
 
-    def search_all(self, sort=True, shortener=True):
+    def scrap(self, sort=True, shortener=True):
         """
         This method performs a web-scrap search on the all avaliable websites .
 
@@ -269,40 +282,47 @@ class PriceMiner:
             return pd.DataFrame(data)
 
 
+def send_email():
+    try:
+        email_from = "kronenautobots@gmail.com"
+        email_to = "matheusts@id.uff.br"
+        smtp = "smtp.gmail.com"
+        excel_file = f"{item}.html"
+        msg = EmailMessage()
+        msg['Subject'] = f"Resultado de Pesquisa por: {item}"
+        msg['From'] = email_from
+        msg['To'] = email_to
+        msg.set_content(
+            f"""
+            Segue em anexo os resultados da pesquisa pelo produto: {item} nos formatos solicitados. 
+            """)
+
+        with open(excel_file, 'rb') as f:
+            file_data = f.read()
+
+        msg.add_attachment(file_data, maintype="application",
+                           subtype="html", filename=excel_file)
+        server = smtplib.SMTP(smtp, 587)
+        server.starttls()
+        server.login(email_from, open('senha.txt').read().strip())
+        server.send_message(msg)
+        server.quit()
+        print('Email-enviado com sucesso')
+    except:
+        print('Erro ao enviar e-mail')
+
+
 if __name__ == '__main__':
 
+    # you may get different number of proxy when  you run this at each time
+    req_proxy = RequestProxy()
+    proxies = req_proxy.get_proxy_list()  # this will create proxy list
+
     #item = sys.argv[1]
-    item = "remdi 9a"
+    item = "echo dot"
     max_items = 10
     pesquisa_preco = PriceMiner(item, max_items)
-    produtos = pesquisa_preco.show_relevants(pesquisa_preco.search_all(), 1)
-    produtos.to_html(f"{item}.html")
+    produtos = pesquisa_preco.show_relevants(pesquisa_preco.scrap(), 1)
+    #produtos.to_html(f"{item}.html", index=False)
+    # produtos.to_json(f"{item}.json")
     pesquisa_preco.browser.quit()
-
-try:
-    email_from = "kronenautobots@gmail.com"
-    email_to = "matheusts@id.uff.br"
-    smtp = "smtp.gmail.com"
-    excel_file = f"{item}.html"
-    msg = EmailMessage()
-    msg['Subject'] = f"Resultado de Pesquisa por: {item}"
-    msg['From'] = email_from
-    msg['To'] = email_to
-    msg.set_content(
-        f"""
-        Segue em anexo os resultados da pesquisa pelo produto: {item} nos formatos solicitados. 
-        """)
-
-    with open(excel_file, 'rb') as f:
-        file_data = f.read()
-
-    msg.add_attachment(file_data, maintype="application",
-                       subtype="html", filename=excel_file)
-    server = smtplib.SMTP(smtp, 587)
-    server.starttls()
-    server.login(email_from, open('senha.txt').read().strip())
-    server.send_message(msg)
-    server.quit()
-    print('Email-enviado com sucesso')
-except:
-    print('Erro ao enviar e-mail')
