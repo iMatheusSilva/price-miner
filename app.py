@@ -284,7 +284,7 @@ class PriceMiner:
 def send_email():
     try:
         email_from = "kronenautobots@gmail.com"
-        email_to = "matheusts@id.uff.br"
+        email_to = sys.argv[2]
         smtp = "smtp.gmail.com"
         excel_file = f"{item}.html"
         msg = EmailMessage()
@@ -321,5 +321,4 @@ if __name__ == '__main__':
     produtos = pesquisa_preco.show_relevants(pesquisa_preco.scrap(), 1)
     produtos.to_html(f"{item}.html", index=False)
     send_email()
-    # produtos.to_json(f"{item}.json")
     pesquisa_preco.browser.quit()
