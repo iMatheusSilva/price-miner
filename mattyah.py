@@ -55,7 +55,6 @@ class PriceMiner:
         """
         options = webdriver.ChromeOptions()
         options.add_argument('--no-sandbox')
-        options.add_argument('--window-size=1420,1080')
         options.add_argument('--disable-gpu')
         PROXY = proxies[0].get_address()
         webdriver.DesiredCapabilities.CHROME['proxy'] = {
@@ -304,7 +303,7 @@ def send_email():
                            subtype="html", filename=excel_file)
         server = smtplib.SMTP(smtp, 587)
         server.starttls()
-        server.login(email_from, open('senha.txt').read().strip())
+        server.login(email_from, open('config.txt').read().strip())
         server.send_message(msg)
         server.quit()
         print('Email-enviado com sucesso')
@@ -314,15 +313,14 @@ def send_email():
 
 if __name__ == '__main__':
 
-    # you may get different number of proxy when  you run this at each time
     req_proxy = RequestProxy()
-    proxies = req_proxy.get_proxy_list()  # this will create proxy list
+    proxies = req_proxy.get_proxy_list()
 
     #item = sys.argv[1]
     item = "echo dot"
     max_items = 10
     pesquisa_preco = PriceMiner(item, max_items)
     produtos = pesquisa_preco.show_relevants(pesquisa_preco.scrap(), 1)
-    #produtos.to_html(f"{item}.html", index=False)
+    produtos.to_html(f"{item}.html", index=False)
     # produtos.to_json(f"{item}.json")
     pesquisa_preco.browser.quit()
