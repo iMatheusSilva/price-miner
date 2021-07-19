@@ -13,6 +13,7 @@ import smtplib
 import random
 import sys
 import pyshorteners
+import streamlit as st
 from email.message import EmailMessage
 
 
@@ -53,18 +54,9 @@ class PriceMiner:
         Return:
         - browser(object)
         """
+
         options = webdriver.ChromeOptions()
-        options.add_argument('--no-sandbox')
-        options.add_argument('--disable-gpu')
-        PROXY = proxies[0].get_address()
-        webdriver.DesiredCapabilities.CHROME['proxy'] = {
-            "httpProxy": PROXY,
-            "ftpProxy": PROXY,
-            "sslProxy": PROXY,
-
-            "proxyType": "MANUAL",
-
-        }
+        options.add_argument('--start-maximized')
         if headless:
             options.add_argument("--headless")
         self.browser = webdriver.Chrome(options=options)
@@ -120,14 +112,19 @@ class PriceMiner:
         df4 = self.magalu()
         dataframes = [df1, df2, df3, df4]
         final_dataframe = pd.concat(dataframes, ignore_index=True)
+        self.browser.quit()
         if shortener:
             s = pyshorteners.Shortener()
+            st.markdown(
+                "<img src='https://i.ibb.co/K5LjzZY/settings.gif' width='20px'> Encurtando Urls...</img>", unsafe_allow_html=True)
             for i in range(len(final_dataframe)):
                 shortener_api = [s.tinyurl.short(final_dataframe['Link'].values[i]),
                                  s.isgd.short(final_dataframe['Link'].values[i]), s.qpsru.short(final_dataframe['Link'].values[i])]
                 final_dataframe['Link'].values[i] = shortener_api[random.randint(
                     0, 2)]
         if sort:
+            st.markdown(
+                "<img src='https://i.ibb.co/37z7LL9/spinning-arrows.gif' width='20px'> Ordenando...</img>", unsafe_allow_html=True)
             return final_dataframe.sort_values(by=['Preço R$'])
         else:
             return final_dataframe
@@ -156,7 +153,7 @@ class PriceMiner:
                 'a-price-fraction')
             self.__link_elements = b.find_elements_by_class_name(
                 's-no-outline')
-            for i in range(0, max_items):
+            for i in range(0, self.max_items):
                 self.__name_values.append(self.__name_elements[i].text)
                 self.__cents_elements[i] = int(
                     self.__cents_elements[i].text)/100
@@ -194,7 +191,7 @@ class PriceMiner:
             for i in range(0, len(ml_items)):
                 self.__link_elements.append(
                     ml_items[i].find_element_by_class_name('ui-search-link'))
-            for i in range(0, max_items):
+            for i in range(0, self.max_items):
                 self.__name_values.append(self.__name_elements[i].text)
                 self.__link_values.append(
                     self.__link_elements[i].get_attribute('href'))
@@ -228,7 +225,7 @@ class PriceMiner:
             self.__price_elements = b.find_elements_by_class_name('price')
             self.__link_elements = b.find_elements_by_class_name('product-li')
             del self.__price_elements[0:4]
-            for i in range(0, max_items):
+            for i in range(0, self.max_items):
                 self.__name_values.append(self.__name_elements[i].text)
                 aux_price = self.__price_elements[i].text.replace(
                     'à vista', '').replace('R$ ', '').replace(',', '.')
@@ -268,7 +265,7 @@ class PriceMiner:
                 self.__link_elements.append(b.find_element_by_xpath(
                     f'/html/body/div[1]/div/div[3]/div/div[2]/div/div[2]/div[{i}]/a'))
 
-            for i in range(0, max_items):
+            for i in range(0, self.max_items):
                 self.__name_values.append(self.__name_elements[i].text)
                 aux_price = self.__price_elements[i].text.replace(
                     '.', '').replace(',', '.')
@@ -281,10 +278,10 @@ class PriceMiner:
             return pd.DataFrame(data)
 
 
-def send_email():
+def send_email(email, item):
     try:
         email_from = "kronenautobots@gmail.com"
-        email_to = sys.argv[2]
+        email_to = email  # sys.argv[2]
         smtp = "smtp.gmail.com"
         excel_file = f"{item}.html"
         msg = EmailMessage()
@@ -306,13 +303,34 @@ def send_email():
         server.login(email_from, open('config.txt').read().strip())
         server.send_message(msg)
         server.quit()
-        print('Email-enviado com sucesso')
-    except:
-        print('Erro ao enviar e-mail')
+        return True
+    except Exception as e:
+        st.write(f"Ocorreu um erro ao enviar o email: {e}")
+        return False
+
+
+def teste():
+    options = webdriver.ChromeOptions()
+    req_proxy = RequestProxy()
+    proxies = req_proxy.get_proxy_list()
+    PROXY = proxies[0].get_address()
+    webdriver.DesiredCapabilities.CHROME['proxy'] = {
+        "httpProxy": PROXY,
+        "ftpProxy": PROXY,
+        "sslProxy": PROXY,
+
+        "proxyType": "MANUAL",
+
+    }
+    options.add_argument('--start-maximized')
+    driver = webdriver.Chrome()
+    driver.get("https://www.expressvpn.com/what-is-my-ip")
+    return driver.title + str(random.randint(0, 20))
 
 
 if __name__ == '__main__':
 
+    """print(teste())
     req_proxy = RequestProxy()
     proxies = req_proxy.get_proxy_list()
     item = sys.argv[1]
@@ -321,4 +339,4 @@ if __name__ == '__main__':
     produtos = pesquisa_preco.show_relevants(pesquisa_preco.scrap(), 1)
     produtos.to_html(f"{item}.html", index=False)
     send_email()
-    pesquisa_preco.browser.quit()
+    pesquisa_preco.browser.quit()"""
