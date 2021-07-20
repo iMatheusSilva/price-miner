@@ -56,7 +56,7 @@ class PriceMiner:
         """
 
         options = webdriver.ChromeOptions()
-        options.add_argument('--start-maximized')
+        options.add_argument("--window-size=1920,1080")
         if headless:
             options.add_argument("--headless")
         self.browser = webdriver.Chrome(options=options)
@@ -75,6 +75,7 @@ class PriceMiner:
         """
         try:
             self.browser.get(url)
+            sleep(1)
             search_input = self.browser.find_element_by_xpath(input_element)
             search_input.send_keys(self.item)
             search_input.send_keys(Keys.ENTER)
@@ -128,6 +129,13 @@ class PriceMiner:
             return final_dataframe.sort_values(by=['Preço R$'])
         else:
             return final_dataframe
+
+    def scroller(self):
+        for i in range(1, 10):
+            mult = i/10
+            self.browser.execute_script(
+                f"window.scrollTo(0,document.body.scrollHeight * {mult})")
+            sleep(0.3)
 
     def amazon(self):
         """
@@ -253,19 +261,29 @@ class PriceMiner:
         self.__setup()
         url = 'https://shopee.com.br'
         place = 'Shopee'
+
+        if self.max_items > 150:
+            max_shopee = 15
+        else:
+            max_shopee = self.max_items
         input_element = '//*[@id="main"]/div/div[2]/div[1]/div[2]/div/div[1]/div[1]/div/form/input'
         b = self.browser
+
         if self.__do_search(url, input_element):
-            sleep(2)
-            for i in range(1, self.max_items+1):
-                self.__name_elements.append(b.find_element_by_xpath(
-                    f'/html/body/div[1]/div/div[3]/div/div[2]/div/div[2]/div[{i}]/a/div/div/div[2]/div[1]/div[1]/div'))
+            self.scroller()
+            for i in range(1, max_shopee+1):
+                try:
+                    self.__name_elements.append(b.find_element_by_xpath(
+                        f'//*[@id="main"]/div/div[3]/div/div[2]/div[2]/div[2]/div[{i}]/a/div/div/div[2]/div[1]/div[1]/div'))
+                except:
+                    self.__name_elements.append(b.find_element_by_xpath(
+                        f'//*[@id="main"]/div/div[3]/div/div[2]/div/div[2]/div[{i}]/a/div/div/div[2]/div[1]/div/div'))
                 self.__price_elements.append(b.find_element_by_xpath(
                     f'/html/body/div[1]/div/div[3]/div/div[2]/div/div[2]/div[{i}]/a/div/div/div[2]/div[2]/div/span[2]'))
                 self.__link_elements.append(b.find_element_by_xpath(
                     f'/html/body/div[1]/div/div[3]/div/div[2]/div/div[2]/div[{i}]/a'))
 
-            for i in range(0, self.max_items):
+            for i in range(0, max_shopee):
                 self.__name_values.append(self.__name_elements[i].text)
                 aux_price = self.__price_elements[i].text.replace(
                     '.', '').replace(',', '.')

@@ -38,25 +38,26 @@ if __name__ == "__main__":
     side_bar_credis()
     header_intro_2()
 
-    user_input = st.text_input("Qual produto você deseja pesquisar?")
-    user_email = st.text_input("Seu E-mail:")
-    max_items = st.text_input("Quantidade de itens por loja: máx = 25")
+    item = st.text_input("Qual produto você deseja pesquisar?")
+    user_email = st.text_input("Seu E-mail:", "kronenautobots@gmail.com")
+    max_items = st.text_input("Quantidade de itens por loja: máx = 50", "50")
     st.write("A quantidade final de itens pesquisados pode variar, pois são retirados itens aqueles não relevantes à busca.")
     encurtar = st.checkbox(
         "Encurtar links? (Aumenta razoávelmente o tempo de processamento)")
     if st.button("Pesquisar"):
         st.markdown(
             "<img src='https://i.ibb.co/v4ckXms/search.gif' width='20px'> Pesquisando...</img>", unsafe_allow_html=True)
-        item = user_input
-        max_items = 10
-        pesquisa_preco = app.PriceMiner(item, max_items)
-        produtos = pesquisa_preco.show_relevants(
-            pesquisa_preco.scrap(), 1)
+        x = app.PriceMiner(item, int(max_items), headless=False)
+        produtos = x.show_relevants(x.scrap(shortener=encurtar), 1)
+        # produtos = x.show_relevants(x.amazon(), 1) max = 50
+        # produtos = x.show_relevants(x.shopee(), 1) max = 20
+        # produtos = x.show_relevants(x.magalu(), 1) max = 50
+        # produtos = x.show_relevants(x.mercadolivre(), 1) max = 50
         st.markdown(
             "<img src='https://i.ibb.co/wYkr0SH/circles-menu-1.gif' width='15px'> Salvando arquivo...</img>", unsafe_allow_html=True)
         produtos.to_html(f"{item}.html", index=False)
         st.markdown(
             "<img src='https://i.ibb.co/z6gH7yQ/177-envelope-mail-send-outline.gif' width='20px'> Enviando e-mail...</img>", unsafe_allow_html=True)
-        if app.send_email(user_email, user_input):
+        if app.send_email(user_email, item):
             st.markdown(
                 "<img src='https://i.ibb.co/fMvwVnh/check-circle.gif' width='20px'> Email enviado com sucesso !</img>", unsafe_allow_html=True)
