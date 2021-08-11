@@ -6,4 +6,5 @@ pyshorteners==1.0.1
 scipy==1.7.0
 secure-smtplib==0.1.1
 selenium==3.141.0
+streamlit==0.84.1
 
