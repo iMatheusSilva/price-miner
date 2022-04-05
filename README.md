@@ -1,7 +1,5 @@
 # price-miner
-Minerador de preços voltado para buscas em lojas brasileiras, utilizando o conceito de Web Scraping, com Python através da biblioteca Selenium.
-
-- Disclaimer: Aplicação desenvolvida apenas para uso pessoal, com intuito de aperfeiçoar conhecimentos e desenvolver práticas, sem quaisquer fins lucrativos comerciais ou profissionais 
+Minerador de preços voltado para buscas em lojas brasileiras, utilizando o conceito de Web Scraping, com Python através da biblioteca Selenium
 
 # Requisitos:
 
